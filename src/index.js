@@ -1,6 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createStore, combineReducers } from 'redux'
+import { createStore, combineReducers, applyMiddleware, compose } from 'redux'
 import { Provider } from 'react-redux'
 
 import './index.css';
@@ -15,8 +15,20 @@ const rootReducer = combineReducers({
   res: resultReducer
 })
 
+const logger = store => {
+  return next => {
+    return action => {
+      console.log('[Middleware] Dispatching', action)
+      const result = next(action)
+      console.log('[Middleware] next state', store.getState())
+      return result
+    }
+  }
+}
 
-const store = createStore(rootReducer)
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose
+
+const store = createStore(rootReducer, composeEnhancers(applyMiddleware(logger)))
 
 // Surround App with Provider component from react-redux. Set store prop to redux store
 
